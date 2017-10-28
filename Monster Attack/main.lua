@@ -83,7 +83,7 @@ local function createMonster()
  
     local newMonster = display.newImageRect( "creature orange.png", 110, 110 )
     table.insert( monstersTable, newMonster )
-    physics.addBody( newMonster, "dynamic", { radius=40, bounce=0. 1} )
+    physics.addBody( newMonster, "dynamic", { radius=40, bounce=0.1 } )
     newMonster.myName = "monster"
  
     local whereFrom = math.random( 3 )
