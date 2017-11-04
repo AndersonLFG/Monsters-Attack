@@ -44,8 +44,7 @@ balloon.alpha = 1.0
 balloon.myName = "cannon"
 
 -- Display lives and score
-livesText = display.newText( "Lives: " .. lives, 75, -20, native.systemFont, 30 )
-scoreText = display.newText( "Score: " .. score, 225, -20, native.systemFont, 30 )
+scoreText = display.newText( "Score: " .. score, 75, -20, native.systemFont, 30 )
 
 function fireLaser()
 	local bullet = display.newImageRect(naveGroup, "cannonball.png", 27.6, 27.6 )
@@ -180,10 +179,10 @@ local function onCollision( event )
  
                 -- Update lives
                 lives = lives - 1
-                livesText.text = "Lives: " .. lives
  
                 if ( lives ~= 1 ) then
                     display.remove( balloon )
+                    composer.gotoScene( "menu")
                     timer.performWithDelay( 2000, endGame )
                 else
                     balloon.alpha = 0
