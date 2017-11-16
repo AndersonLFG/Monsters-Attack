@@ -14,37 +14,57 @@ system.activate("multitouch")
 physics.start()
 physics.setGravity( 0, 0 )
 
-local doLauch = false
-local scene = composer.newScene()
 local timeCount = 60
+local doLauch = false
 local lives = 1
 local score = 0
 local died = false
-local livesText
-local scoreText
-
-local background = display.newImageRect( "castleday.png", 360, 570 )
-background.x = display.contentCenterX
-background.y = display.contentCenterY
-
-local platform = display.newImageRect( "skullfield.png", 320, 70)
-physics.addBody( platform, "static", { bounce=0})
-platform.objType = "ground"
-platform.myName = "platform"
-platform.x = display.contentCenterX
-platform.y = display.contentHeight
 local naveGroup = display.newGroup()
+local scoreBackup
+local newEnemy
 
-local balloon = display.newImageRect(naveGroup, "cannon.png",89, 99 )
---entre 40 e 280
-balloon.x = display.contentCenterX
-balloon.y = display.contentCenterY*1.65
-physics.addBody( balloon, "static", { radius=40 } )
-balloon.alpha = 1.0
-balloon.myName = "cannon"
+function scene:create( event )
+
+    local sceneGroup = self.view
+    -- Code here runs when the scene is first created but has not yet appeared on screen
+
+    physics.pause()  -- Temporarily pause the physics engine
+    naveGroup = display.newGroup()
+    -- Set up display groups
+    backGroup = display.newGroup()  -- Display group for the background image
+    sceneGroup:insert( backGroup )  -- Insert into the scene's view group
+
+    mainGroup = display.newGroup()  -- Display group for the ship, asteroids, lasers, etc.
+    sceneGroup:insert( mainGroup )  -- Insert into the scene's view group
+
+    uiGroup = display.newGroup()    -- Display group for UI objects like the score
+    sceneGroup:insert( uiGroup )    -- Insert into the scene's view group
+    
+    local background = display.newImageRect(backGroup, "castleday.png", 360, 570 )
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
+    --mainGroup:insert(background)   
+    local platform = display.newImageRect(backGroup, "skullfield.png", 320, 70)
+    physics.addBody( platform, "static", { bounce=0})
+    platform.objType = "ground"
+    platform.myName = "platform"
+    --sceneGroup:insert(platform)
+    platform.x = display.contentCenterX
+    platform.y = display.contentHeight
+
+    balloon = display.newImageRect(naveGroup, "cannon.png",89, 99 )
+    --entre 40 e 280
+    balloon.x = display.contentCenterX
+    balloon.y = display.contentCenterY*1.65
+    physics.addBody( balloon, "static", { radius=40 } )
+    balloon.alpha = 1.0
+    --mainGroup:insert(balloon)
+    balloon.myName = "cannon"
+end
 
 -- Display lives and score
-scoreText = display.newText( "Score: " .. score, 75, -20, native.systemFont, 30 )
+local scoreText = display.newText( "Pontos:" ..score, 120, -20, "aircruiser.ttf", 35 )
+scoreText:setFillColor( white )
 
 function fireLaser()
 	local bullet = display.newImageRect(naveGroup, "cannonball.png", 27.6, 27.6 )
@@ -61,26 +81,12 @@ function fireLaser()
 		end})
 end
 
-local function restoreCannon()
- 
-    balloon.isBodyActive = false
-    balloon.x = display.contentCenterX
-    balloon.y = display.contentHeight - 80
- 
-    -- Fade in the cannon
-    transition.to( balloon, { alpha=1, time=4000,
-        onComplete = function()
-            balloon.isBodyActive = true
-            died = false
-        end
-    } )
-end
-
 local monstersTable = {}
 
-local function createAsteroid()
+function createAsteroid()
 
-  local newEnemy = display.newImageRect( naveGroup, "creature orange.png", 91, 91 )
+  newEnemy = display.newImageRect("creature orange.png", 91, 91 )
+  naveGroup:insert(newEnemy)
   table.insert( monstersTable, newEnemy )
   physics.addBody( newEnemy, "dynamic", { radius=25, bounce=0.0 } )
   newEnemy.myName = "monster"
@@ -121,21 +127,20 @@ local function gameLoop()
     for i = #monstersTable, 1, -1 do
         local thisMonster = monstersTable[i]
  
-        --if ( thisMonster.x < -100 or
-        --     thisMonster.x > display.contentWidth + 100 or
-        --     thisMonster.y < -100 or
-        --     thisMonster.y > display.contentHeight + 100 )
-        --then
-        --   display.remove( thisMonster )
-        --    table.remove( monstersTable, i )
-        --end
+        --[[if ( thisMonster.x < -100 or
+             thisMonster.x > display.contentWidth + 100 or
+             thisMonster.y < -100 or
+             thisMonster.y > display.contentHeight + 100 )
+        then
+            display.remove( thisMonster )
+            table.remove( monstersTable, i )
+        ]]
     end
 end
 
-gameLoopTimer = timer.performWithDelay( 500, gameLoop, 0 )
 local function endGame()
-    --composer.setVariable( "finalScore", score )
-    composer.gotoScene( "menu", { time=800, effect="crossFade" } )
+    composer.setVariable( "finalScore", score )
+    composer.gotoScene("gameover", { time=800, effect="crossFade" } )
 end
 
 local function onCollision( event )
@@ -150,7 +155,7 @@ local function onCollision( event )
             -- Remove monster
             display.remove( obj2)
             lives = lives - 1
-            composer.gotoScene( "menu")
+            endGame()
         end
 
         if ( ( obj1.myName == "bullet" and obj2.myName == "monster" ) or
@@ -163,13 +168,14 @@ local function onCollision( event )
             for i = #monstersTable, 1, -1 do
                 if ( monstersTable[i] == obj1 or monstersTable[i] == obj2 ) then
                     table.remove( monstersTable, i )
+
                     break
                 end
             end
  
             -- Increase score
-            score = score + 10
-            scoreText.text = "Score: " .. score
+            score = score + 5
+            scoreText.text = "Pontos:" .. score
 
         elseif ( ( obj1.myName == "cannon" and obj2.myName == "monster" ) or
                  ( obj1.myName == "monster" and obj2.myName == "cannon" ) )
@@ -178,41 +184,20 @@ local function onCollision( event )
                 died = true
  
                 -- Update lives
+                
                 lives = lives - 1
  
                 if ( lives ~= 1 ) then
                     display.remove( balloon )
-                    composer.gotoScene( "menu")
-                    timer.performWithDelay( 2000, endGame )
+                    endGame()
+                    --composer.gotoScene( "menu")
+                    timer.performWithDelay( 2000 )
+                    
                 else
                     balloon.alpha = 0
                     timer.performWithDelay( 1000, restoreCannon )
                 end
             end
-        end
-    end
-end
-
-local moveLeft = 0
-local moveRight = 0
-
-local touchFunction = function(e)
-    
-    if e.phase == "began"  then
-        if e.target.myName == "Right" then
-            moveRight = 10
-             balloon.x = balloon.x + moveRight
-        else
-            moveLeft = -10
-            balloon.x = balloon.x + moveLeft
-        end
-    elseif e.phase == "moved"  then
-        if e.target.myName == "Right" then     
-            moveRight = 10
-             balloon.x = balloon.x + moveRight
-        else
-            moveLeft = -10
-            balloon.x = balloon.x + moveLeft
         end
     end
 end
@@ -238,6 +223,7 @@ local mLeft = widget.newButton {
 	--label = "Left",
 	defaultFile = "button1.png",
 	overFile = "button2.png",
+    --mainGroup:insert(mLeft),
 	x = display.contentWidth/7, y = display.contentHeight/1,
 	width = 80, height = 80,
 	onPress = moveLeft
@@ -248,6 +234,7 @@ local mRight = widget.newButton {
 	--label = "Right",
 	defaultFile = "button1.png",
 	overFile = "button2.png",
+    --mainGroup:insert(mRight),
 	x = display.contentWidth/1.17, y = display.contentHeight/1,
 	width = 80, height = 80,
 	onPress = moveRight
@@ -259,6 +246,7 @@ local atirar = widget.newButton {
 	--labelColor = { default={0,100,0}, over={255,215,0} },
 	defaultFile = "atirar.png",
 	overFile = "atirar2.png",
+    --mainGroup:insert(atirar),
 	x = display.contentWidth/2, y = display.contentHeight/1,
 	width = 90, height = 90,
 	onPress = fireLaser,
@@ -266,24 +254,17 @@ local atirar = widget.newButton {
 }
 Runtime:addEventListener( "collision", onCollision )
 
-function scene:create( event )
+--[[function removeMonstro()
+    if ( newEnemy.x > -100 or
+         newEnemy.x < display.contentWidth + 100 or
+         newEnemy.y > -100 or
+         newEnemy.y < display.contentHeight + 100 )
+    then
+        display.remove( newEnemy )
+        table.remove( monstersTable, i )
+    end
+end]]
 
-    local sceneGroup = self.view
-    -- Code here runs when the scene is first created but has not yet appeared on screen
-
-    physics.pause()  -- Temporarily pause the physics engine
-
-    -- Set up display groups
-    backGroup = display.newGroup()  -- Display group for the background image
-    sceneGroup:insert( backGroup )  -- Insert into the scene's view group
-
-    mainGroup = display.newGroup()  -- Display group for the ship, asteroids, lasers, etc.
-    sceneGroup:insert( mainGroup )  -- Insert into the scene's view group
-
-    uiGroup = display.newGroup()    -- Display group for UI objects like the score
-    sceneGroup:insert( uiGroup )    -- Insert into the scene's view group
-    
-end
 
 
 -- show()
@@ -299,7 +280,7 @@ function scene:show( event )
         -- Code here runs when the scene is entirely on screen
         physics.start()
         Runtime:addEventListener( "collision", onCollision )
-        gameLoopTimer = timer.performWithDelay( 500, gameLoop, 0 )
+        gameLoopTimer = timer.performWithDelay( 500, gameLoop, -1 )
     end
 end
 
@@ -313,6 +294,24 @@ function scene:hide( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
         timer.cancel( gameLoopTimer )
+        mRight:removeSelf()
+        mRight = nil
+        mLeft:removeSelf()
+        mLeft = nil
+        atirar:removeSelf()
+        atirar = nil
+        balloon:removeSelf()
+        balloon = nil
+        scoreText:removeSelf()
+        --scoreText = nil
+        display.remove( thisMonster )
+        display.remove( naveGroup )
+        --monster:removeSelf()
+        monster = nil
+        --removeMonstro()
+        --monstersTable:removeSelf()
+        
+
 
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen

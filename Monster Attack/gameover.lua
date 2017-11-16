@@ -12,26 +12,14 @@ local function gotoGame()
 	composer.gotoScene( "game", { time=800, effect="crossFade" } )
 end
 
-local function gotoHighScores()
-	composer.gotoScene( "highscores", { time=800, effect="crossFade" } )
+local function gotoMenu()
+	composer.gotoScene( "menu", { time=800, effect="crossFade" } )
 end
 
 
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
-local function exitGame()
-  print("tapped exit button")
-  audio.play( selected )
-  timer.performWithDelay( 1000,
-    function()
-      if( system.getInfo("platformName")=="Android" ) then
-        native.requestExit()
-      else
-        os.exit()
-      end
-    end )
-end
 
 -- create()
 function scene:create( event )
@@ -39,7 +27,7 @@ function scene:create( event )
 	local sceneGroup = self.view
 	-- Code here runs when the scene is first created but has not yet appeared on screen
 
-	local background = display.newImageRect( sceneGroup, "bgmenu.png", 341, 640 )
+	local background = display.newImageRect( sceneGroup, "testefund2.png", 335, 600 )
 	background.x = display.contentCenterX
 	background.y = display.contentCenterY
 
@@ -47,26 +35,18 @@ function scene:create( event )
 	--title.x = display.contentCenterX
 	--title.y = 200
 
-	local playButton = display.newImageRect( sceneGroup, "button_jogar.png", 107, 40 )
+	local playButton = display.newImageRect( sceneGroup, "butagain.png", 246, 40 )
 	playButton.x = display.contentCenterX
 	playButton.y = 150
-	--playButton:setFillColor( 0.82, 0.86, 1 )
 
-	local highScoresButton = display.newImageRect( sceneGroup, "button_recordes.png", 107, 40 )
-	highScoresButton.x = display.contentCenterX
-	highScoresButton.y = 200
-	--highScoresButton:setFillColor( 0.75, 0.78, 1 )
-
-	local exitButton = display.newImageRect( sceneGroup, "button_sair.png", 107, 40 )
-	exitButton.x = display.contentCenterX
-	exitButton.y = 250
+	local menuButton = display.newImageRect( sceneGroup, "button_menu.png", 103, 40 )
+	menuButton.x = display.contentCenterX
+	menuButton.y = 200
 
 	playButton:addEventListener( "tap", gotoGame )
-	highScoresButton:addEventListener( "tap", gotoHighScores )
-	exitButton:addEventListener( "tap", exitGame )
-	--exitButton:addEventListener( "tap", gotoHighScores )
-
+	menuButton:addEventListener( "tap", gotoMenu )
 end
+
 
 -- show()
 function scene:show( event )
