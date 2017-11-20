@@ -2,7 +2,7 @@
 local composer = require( "composer" )
 
 local scene = composer.newScene()
-local button
+local button = audio.loadStream( "buttont.mp3" )
 
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
@@ -43,38 +43,29 @@ function scene:create( event )
 
 	local sceneGroup = self.view
 	-- Code here runs when the scene is first created but has not yet appeared on screen
-	--button = audio.loadSound( "button.wav" )
 
 	local background = display.newImageRect( sceneGroup, "bgmenu.png", 341, 640 )
 	background.x = display.contentCenterX
 	background.y = display.contentCenterY
 
-	--local title = display.newImageRect( sceneGroup, "title.png", 500, 80 )
-	--title.x = display.contentCenterX
-	--title.y = 200
-
 	local playButton = display.newImageRect( sceneGroup, "button_jogar.png", 107, 40 )
 	playButton.x = display.contentCenterX
 	playButton.y = 150
-	--musicButton()
-
-	--playButton:setFillColor( 0.82, 0.86, 1 )
 
 	local highScoresButton = display.newImageRect( sceneGroup, "button_recordes.png", 107, 40 )
 	highScoresButton.x = display.contentCenterX
 	highScoresButton.y = 200
-	--musicButton()
-	--highScoresButton:setFillColor( 0.75, 0.78, 1 )
 
 	local exitButton = display.newImageRect( sceneGroup, "button_sair.png", 107, 40 )
 	exitButton.x = display.contentCenterX
 	exitButton.y = 250
-	--musicButton
 
 	playButton:addEventListener( "tap", gotoGame )
 	highScoresButton:addEventListener( "tap", gotoHighScores )
 	exitButton:addEventListener( "tap", exitGame )
-	--exitButton:addEventListener( "tap", gotoHighScores )
+	playButton:addEventListener( "tap", musicButton )
+	highScoresButton:addEventListener( "tap", musicButton )
+	exitButton:addEventListener( "tap", musicButton )
 
 end
 

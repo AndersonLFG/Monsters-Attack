@@ -2,6 +2,8 @@
 local composer = require( "composer" )
 
 local scene = composer.newScene()
+
+local button = audio.loadStream( "buttont.mp3" )
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -13,6 +15,10 @@ end
 
 local function gotoMenu()
 	composer.gotoScene( "menu", { time=800, effect="crossFade" } )
+end
+
+local function musicButton()
+	audio.play( button )
 end
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
@@ -39,6 +45,7 @@ function scene:create( event )
 
 	--playButton:addEventListener( "tap", gotoGame )
 	menuButton:addEventListener( "tap", gotoMenu )
+	menuButton:addEventListener( "tap", musicButton )
 
 	local pontuacao = display.newImageRect( sceneGroup, "buttonp.png", 200, 40 )
 	pontuacao.x = display.contentCenterX

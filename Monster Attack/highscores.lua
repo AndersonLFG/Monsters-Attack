@@ -14,6 +14,11 @@ local json = require( "json" )
 local scoresTable = {}
 
 local filePath = system.pathForFile( "scores.json", system.DocumentsDirectory )
+local button = audio.loadStream( "buttont.mp3" )
+
+local function musicButton()
+	audio.play( button )
+end
 
 local function loadScores()
 
@@ -103,6 +108,7 @@ function scene:create( event )
     menuButton.x = display.contentCenterX
     menuButton.y = 120
     menuButton:addEventListener( "tap", gotoMenu )
+    menuButton:addEventListener( "tap", musicButton )
 
 end
 
