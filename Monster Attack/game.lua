@@ -11,6 +11,11 @@ local scene = composer.newScene()
 display.setStatusBar( display.HiddenStatusBar )
 system.activate("multitouch")
 
+-- Reserve channel 1 for background music
+audio.reserveChannels( 1 )
+-- Reduce the overall volume of the channel
+audio.setVolume( 0.5, { channel=1 } )
+
 physics.start()
 physics.setGravity( 0, 0 )
 
@@ -20,8 +25,10 @@ local lives = 1
 local score = 0
 local died = false
 local naveGroup = display.newGroup()
-local scoreBackup
 local newEnemy
+local fireSound
+local deathSound
+local musicTrack
 
 function scene:create( event )
 
@@ -44,7 +51,7 @@ function scene:create( event )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
     --mainGroup:insert(background)   
-    local platform = display.newImageRect(backGroup, "skullfield.png", 320, 70)
+    local platform = display.newImageRect(backGroup, "platf.png", 320, 70)
     physics.addBody( platform, "static", { bounce=0})
     platform.objType = "ground"
     platform.myName = "platform"
@@ -60,6 +67,9 @@ function scene:create( event )
     balloon.alpha = 1.0
     --mainGroup:insert(balloon)
     balloon.myName = "cannon"
+    fireSound = audio.loadSound( "tiro.wav" )
+    deathSound = audio.loadSound( "death.mp3" )
+    musicTrack = audio.loadStream( "Automation.mp3" )
 end
 
 -- Display lives and score
@@ -67,6 +77,10 @@ local scoreText = display.newText( "Pontos:" ..score, 120, -20, "aircruiser.ttf"
 scoreText:setFillColor( white )
 
 function fireLaser()
+
+    -- Play fire sound!
+    audio.play( fireSound )
+
 	local bullet = display.newImageRect(naveGroup, "cannonball.png", 27.6, 27.6 )
 	physics.addBody( bullet, "dynamic", { radius=10, { isSensor=true }} )
 	bullet.isBullet = true
@@ -126,15 +140,6 @@ local function gameLoop()
         -- Remove asteroids which have drifted off screen
     for i = #monstersTable, 1, -1 do
         local thisMonster = monstersTable[i]
- 
-        --[[if ( thisMonster.x < -100 or
-             thisMonster.x > display.contentWidth + 100 or
-             thisMonster.y < -100 or
-             thisMonster.y > display.contentHeight + 100 )
-        then
-            display.remove( thisMonster )
-            table.remove( monstersTable, i )
-        ]]
     end
 end
 
@@ -164,7 +169,9 @@ local function onCollision( event )
             -- Remove both the bullet and monster
             display.remove( obj1 )
             display.remove( obj2 )
- 
+            
+            audio.play( deathSound )
+
             for i = #monstersTable, 1, -1 do
                 if ( monstersTable[i] == obj1 or monstersTable[i] == obj2 ) then
                     table.remove( monstersTable, i )
@@ -254,19 +261,6 @@ local atirar = widget.newButton {
 }
 Runtime:addEventListener( "collision", onCollision )
 
---[[function removeMonstro()
-    if ( newEnemy.x > -100 or
-         newEnemy.x < display.contentWidth + 100 or
-         newEnemy.y > -100 or
-         newEnemy.y < display.contentHeight + 100 )
-    then
-        display.remove( newEnemy )
-        table.remove( monstersTable, i )
-    end
-end]]
-
-
-
 -- show()
 function scene:show( event )
 
@@ -281,6 +275,8 @@ function scene:show( event )
         physics.start()
         Runtime:addEventListener( "collision", onCollision )
         gameLoopTimer = timer.performWithDelay( 500, gameLoop, -1 )
+        -- Start the music!
+        audio.play( musicTrack, { channel=1, loops=-1 } )
     end
 end
 
@@ -307,16 +303,15 @@ function scene:hide( event )
         display.remove( thisMonster )
         display.remove( naveGroup )
         --monster:removeSelf()
-        monster = nil
-        --removeMonstro()
-        --monstersTable:removeSelf()
-        
+        monster = nil      
 
 
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
         Runtime:removeEventListener( "collision", onCollision )
         physics.pause()
+        -- Stop the music!
+        audio.stop( 1 )
         composer.removeScene( "game" )
     end
 end
@@ -326,7 +321,10 @@ function scene:destroy( event )
 
   local sceneGroup = self.view
   -- Code here runs prior to the removal of scene's view
-
+  -- Dispose audio!
+    --audio.dispose( deathSound )
+    --audio.dispose( fireSound )
+    --audio.dispose( musicTrack )
 end
 
 

@@ -15,7 +15,6 @@ local scoresTable = {}
 
 local filePath = system.pathForFile( "scores.json", system.DocumentsDirectory )
 
-
 local function loadScores()
 
 	local file = io.open( filePath, "r" )
@@ -104,6 +103,7 @@ function scene:create( event )
     menuButton.x = display.contentCenterX
     menuButton.y = 120
     menuButton:addEventListener( "tap", gotoMenu )
+
 end
 
 
