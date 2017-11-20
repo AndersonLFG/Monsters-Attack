@@ -29,15 +29,15 @@ function scene:create( event )
 	background.x = display.contentCenterX
 	background.y = display.contentCenterY
 
-	local playButton = display.newImageRect( sceneGroup, "butagain.png", 246, 40 )
+	--[[local playButton = display.newImageRect( sceneGroup, "butagain.png", 246, 40 )
 	playButton.x = display.contentCenterX
-	playButton.y = 150
+	playButton.y = 150]]
 
 	local menuButton = display.newImageRect( sceneGroup, "button_menu.png", 103, 40 )
 	menuButton.x = display.contentCenterX
-	menuButton.y = 200
+	menuButton.y = 240
 
-	playButton:addEventListener( "tap", gotoGame )
+	--playButton:addEventListener( "tap", gotoGame )
 	menuButton:addEventListener( "tap", gotoMenu )
 
 	local pontuacao = display.newImageRect( sceneGroup, "buttonp.png", 200, 40 )
